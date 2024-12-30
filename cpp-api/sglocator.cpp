@@ -9,7 +9,7 @@
 
 using namespace std;
 
-string getSteamLocation(BOOL& err){
+string getSteamLocation(BOOL& err, string& msg){
 	err = false;
 	HKEY hSubKey;
 	DWORD dwType, dwSize = 255;
@@ -24,29 +24,34 @@ string getSteamLocation(BOOL& err){
 	}
 	if(path == NULL){
 		err = true;
+		msg = "Can not find steam installation path";
 		return "";
 	}else{
 		return path;
 	}
 }
 
-vector<string> getLibraryFolders(BOOL& err){
+vector<string> getLibraryFolders(BOOL& err, string& msg){
 	err = false;
 	BOOL error;
+	string error_msg;
 	vector<string> libraryFolders;
-	string steamLocation = getSteamLocation(error);
+	string steamLocation = getSteamLocation(error, error_msg);
 	if(error){
 		err = true;
+		msg = error_msg;
 		return libraryFolders;
 	}
 	string libraryFoldersVdf = steamLocation + "/config/libraryfolders.vdf";
 	if(!filesystem::exists(libraryFoldersVdf)){
 		err = true;
+		msg = "File \"libraryfolders.vdf\" not found";
 		return libraryFolders;
 	}
 	ifstream file(libraryFoldersVdf);
 	if(!file){
 		err = true;
+		msg = "Open \"libraryfolders.vdf\" failed";
 		return libraryFolders;
 	}
 	stringstream buffer;
@@ -70,19 +75,22 @@ vector<string> getLibraryFolders(BOOL& err){
  * @brief Get installation location of the game.
  * 
  * @param err: Setted to true when any error occurs.
+ * @param msg: Message about error info.
  * @param gameFolderName: Must be the right folder name of the game, which you can get by right-click on the game in steam. 
  * 
  * @return locations: Paths where the game installed.
  * Cautions: It may contain more than one location because of the installation or uninstallation history.
  * Therefore, you need to verify for yourself which location is right.
  */
-vector<string> getGameLocation(const string& gameFolderName, BOOL& err){
+vector<string> getGameLocation(const string& gameFolderName, BOOL& err, string& msg){
 	err = false;
 	BOOL error;
+	string error_msg;
 	vector<string> locations;
-	vector<string> folders = getLibraryFolders(error);
+	vector<string> folders = getLibraryFolders(error, error_msg);
 	if(error){
 		err = true;
+		msg = error_msg;
 		return locations;
 	}
 	for(auto it = folders.begin(); it != folders.end(); it++){
@@ -94,20 +102,8 @@ vector<string> getGameLocation(const string& gameFolderName, BOOL& err){
 	return locations;
 }
 
-/*
-int main(){
-	BOOL err;
-	vector<string> v = getGameLocation("killingfloor2",err);
-	if(err){
-		cout<<"error"<<endl;
-		return 0;
-	}
-	for(auto it=v.begin(); it!=v.end();it++){
-		cout<<*it<<endl;
-	}
-	return 0;
-}
-*/
+
+
 
 
 

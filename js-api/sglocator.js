@@ -8,7 +8,7 @@ function getSteamLocation(){
             key: '\\Software\\Valve\\Steam'
         })
         regKey.get('SteamPath', (err, item)=>{
-            if(err) throw new Error(err.toString())
+            if(err) throw new Error('Can Not Find Steam Installation Location')
             if(item){
                 resolve(item.value)
             }else {
